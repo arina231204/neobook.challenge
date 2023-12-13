@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ product.name }} - Eco Market{% endblock %}
+
+{% block content %}
+    <h1>{{ product.name }}</h1>
+    <p>Description: {{ product.description }}</p>
+    <p>Price: {{ product.price }}</p>
+    <p>Available: {% if product.available %}Yes{% else %}No{% endif %}</p>
+{% endblock %}
