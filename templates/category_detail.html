@@ -1,14 +1,39 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ category.name }} - Eco Market{% endblock %}
+{% block title %}Eco Market - {{ category.name }}{% endblock %}
 
 {% block content %}
-    <h1>{{ category.name }}</h1>
-    <p>Description: {{ category.description }}</p>
-    <h2>Products:</h2>
-    <ul>
-        {% for product in products %}
-            <li><a href="{% url 'product_detail' product_id=product.id %}">{{ product.name }}</a></li>
-        {% endfor %}
-    </ul>
+    <style>
+        /* Добавьте этот CSS для установки фиксированного размера изображений */
+        .card-img-top {
+            width: 400px; /* Ширина изображения */
+            height: 300px; /* Высота изображения */
+            object-fit: cover; /* Позволяет сохранять пропорции и обрезать изображение при необходимости */
+        }
+    </style>
+
+    <div class="container mt-3">
+        <h1>{{ category.name }}</h1>
+
+        <!-- Поле для быстрого поиска по текущей категории -->
+        <div class="input-group mb-3">
+            <input type="text" id="searchInput" class="form-control" placeholder="Поиск по текущей категории">
+        </div>
+
+        <div class="row" id="productList">
+            {% for product in products %}
+                <div class="col-lg-4 col-md-6 col-sm-12 mb-4" data-category="{{ product.category.name }}">
+                    <div class="card h-100">
+                        <img src="{{ product.image.url }}" class="card-img-top img-fluid" alt="{{ product.name }}">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ product.name }}</h5>
+                            <p class="card-text">${{ product.price }}</p>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+
 {% endblock %}

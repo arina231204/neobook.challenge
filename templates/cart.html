@@ -1,0 +1,8 @@
+<!-- cart.html -->
+
+<h1>Корзина</h1>
+<ul>
+    {% for product in products_in_cart %}
+        <li>{{ product.name }} - {{ product.price }}</li>
+    {% endfor %}
+</ul>

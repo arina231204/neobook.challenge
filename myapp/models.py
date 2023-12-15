@@ -1,5 +1,5 @@
 from django.db import models
-
+from PIL import Image
 class Category(models.Model):
     name = models.CharField(max_length=100)
     image = models.ImageField(upload_to='images/')
@@ -15,6 +15,7 @@ class Product(models.Model):
     available = models.BooleanField(default=True)
     quantity = models.IntegerField()
     image = models.ImageField(upload_to='images/')
+
 
     def __str__(self):
         return self.name

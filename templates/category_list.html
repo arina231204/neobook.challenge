@@ -4,7 +4,7 @@
 
 {% block content %}
     <style>
-        /* Стили для картинок, чтобы они были одинакового размера */
+        /* Общие стили для изображений в карточках */
         .card-img-top {
             width: 100%;
             height: 200px; /* Задайте желаемую высоту */
@@ -12,6 +12,7 @@
             position: relative;
             transition: filter 0.3s ease; /* Анимация затемнения при наведении */
         }
+
         /* Перетекание затемнения из нижней части карточки */
         .card-overlay {
             position: absolute;
@@ -22,6 +23,7 @@
             background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 60%, rgba(0, 0, 0, 0)); /* Градиент затемнения */
             transition: height 0.3s ease; /* Анимация высоты затемнения при наведении */
         }
+
         /* Стили для текста категорий на карточке */
         .card-text {
             position: absolute;
@@ -33,36 +35,65 @@
             color: white;
             transition: transform 0.3s ease; /* Анимация перемещения текста при наведении */
         }
+
         /* При наведении на картинку */
         .card:hover .card-img-top {
             filter: brightness(70%); /* Затемнение при наведении */
         }
+
         .card:hover .card-overlay {
             height: 100%; /* Увеличение высоты затемнения при наведении */
         }
+
         .card:hover .card-text {
             transform: translateY(-100%); /* Поднять текст наверх при наведении */
         }
+
+        /* Дополнительные стили для общего контейнера с картинками */
+        .image-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+
+        .image-container .card {
+            flex: 0 0 31%; /* Ширина карточки */
+            margin-bottom: 1.5%;
+            position: relative;
+        }
+
+        /* Убедимся, что изображения в карточках сохраняют единый размер */
+        .image-container .card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
     </style>
 
-    <div class="container mt-3">
-        <div class="row">
+
+
+        <div class="row mt-3">
             {% for category in categories %}
-            <div class="col-lg-4 col-md-4 col-sm-6 mb-4">
-                <div class="card">
-                    <!-- Ссылка на страницу деталей категории -->
-                    <a href="{% url 'category_detail' category_id=category.id %}">
-                        <!-- Используем поле изображения для каждой категории -->
-                        <img src="{{ category.image.url }}" class="card-img-top" alt="{{ category.name }}">
-                        <!-- Перетекание затемнения из нижней части карточки -->
-                        <div class="card-overlay"></div>
-                        <!-- Текст категорий на нижней границе карточки -->
-                        <div class="card-text">
-                            <h5>{{ category.name }}</h5>
-                        </div>
-                    </a>
+                <div class="col-lg-4 col-md-4 col-sm-6 mb-4">
+                    <div class="card">
+                        <a href="{% url 'category_detail' category_id=category.id %}">
+                            <img src="{{ category.image.url }}" class="card-img-top" alt="{{ category.name }}">
+                            <div class="card-overlay"></div>
+                            <div class="card-text">
+                                <h5>{{ category.name }}</h5>
+                            </div>
+                        </a>
+                    </div>
                 </div>
-            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Контейнер для изображений -->
+        <div class="image-container">
+            {% for image in images %}
+                <div class="card">
+                    <img src="{{ image.url }}" alt="{{ image.alt }}">
+                </div>
             {% endfor %}
         </div>
     </div>

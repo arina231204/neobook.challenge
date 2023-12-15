@@ -11,7 +11,7 @@
             font-weight: bold;
         }
         .navbar {
-            background-color: #4CAF50; /* Зеленый цвет */
+            background-color: #7CC144; /* Зеленый цвет */
         }
         .navbar-nav .nav-link {
             color: white;
@@ -25,6 +25,22 @@
         }
         .categories-right {
             justify-content: flex-end;
+        }
+        /* Стили для поиска */
+        .search-form {
+            margin-top: 10px;
+        }
+        .search-form input[type="text"] {
+            width: 200px;
+            border-radius: 5px;
+            padding: 5px;
+        }
+        .search-form button {
+            border-radius: 5px;
+            padding: 5px 10px;
+            background-color: #5f5f5f;
+            color: white;
+            border: none;
         }
     </style>
 </head>
@@ -50,6 +66,11 @@
                             <a class="nav-link" href="#">Инфо</a>
                         </li>
                     </ul>
+                    <!-- Форма поиска -->
+                    <form class="search-form ml-3">
+                        <input type="text" placeholder="Поиск...">
+                        <button type="submit">Найти</button>
+                    </form>
                 </div>
             </div>
         </nav>
@@ -59,10 +80,38 @@
         {% block content %}
         {% endblock %}
     </main>
-
+<!-- Подключаем Bootstrap JS (необходим для некоторых компонентов) -->
 
 
     <!-- Подключаем Bootstrap JS (необходим для некоторых компонентов) -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Подключаем jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            // Обработчик отправки формы поиска
+            $('.search-form').on('submit', function(event){
+                event.preventDefault(); // Предотвращаем стандартное поведение отправки формы
+
+                var query = $(this).find('input[type="text"]').val(); // Получаем значение из поля ввода
+
+                // Если введенные символы больше чем 2, отправляем запрос на сервер
+                if(query.length > 2) {
+                    $.ajax({
+                        url: '/search/', // URL для обработки поискового запроса
+                        method: 'GET',
+                        data: {'q': query}, // Передаем введенный запрос
+                        success: function(data){
+                            // Обновляем блок с результатами поиска
+                            $('.search-results').html(data).fadeIn();
+                        },
+                        error: function(error){
+                            console.log(error); // В случае ошибки выводим сообщение в консоль
+                        }
+                    });
+                }
+            });
+        });
+    </script>
 </body>
 </html>

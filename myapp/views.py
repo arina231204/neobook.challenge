@@ -13,3 +13,12 @@ def category_detail(request, category_id):
 def product_detail(request, product_id):
     product = Product.objects.get(id=product_id)
     return render(request, 'product_detail.html', {'product': product})
+
+def search_products(request):
+    query = request.GET.get('search')
+    products = None
+
+    if query:
+        products = Product.objects.filter(name__icontains=query)
+
+    return render(request, 'category_detail.html', {'products': products})
