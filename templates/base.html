@@ -80,38 +80,6 @@
         {% block content %}
         {% endblock %}
     </main>
-<!-- Подключаем Bootstrap JS (необходим для некоторых компонентов) -->
 
-
-    <!-- Подключаем Bootstrap JS (необходим для некоторых компонентов) -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <!-- Подключаем jQuery -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script>
-        $(document).ready(function(){
-            // Обработчик отправки формы поиска
-            $('.search-form').on('submit', function(event){
-                event.preventDefault(); // Предотвращаем стандартное поведение отправки формы
-
-                var query = $(this).find('input[type="text"]').val(); // Получаем значение из поля ввода
-
-                // Если введенные символы больше чем 2, отправляем запрос на сервер
-                if(query.length > 2) {
-                    $.ajax({
-                        url: '/search/', // URL для обработки поискового запроса
-                        method: 'GET',
-                        data: {'q': query}, // Передаем введенный запрос
-                        success: function(data){
-                            // Обновляем блок с результатами поиска
-                            $('.search-results').html(data).fadeIn();
-                        },
-                        error: function(error){
-                            console.log(error); // В случае ошибки выводим сообщение в консоль
-                        }
-                    });
-                }
-            });
-        });
-    </script>
 </body>
 </html>

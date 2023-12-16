@@ -1,8 +1,14 @@
-<!-- cart.html -->
+{% for item in cart_items %}
+    <div>
+        <p>{{ item.name }}</p>
+        <p>Price: {{ item.price }}</p>
+        <form method="post" action="{% url 'update_cart' item.id %}">
+            {% csrf_token %}
+            <input type="number" name="quantity" value="{{ item.quantity }}" min="1">
+            <button type="submit">Update</button>
+        </form>
+        <a href="{% url 'remove_from_cart' item.id %}">Remove</a>
+    </div>
+{% endfor %}
 
-<h1>Корзина</h1>
-<ul>
-    {% for product in products_in_cart %}
-        <li>{{ product.name }} - {{ product.price }}</li>
-    {% endfor %}
-</ul>
+<p>Total: {{ total }}</p>

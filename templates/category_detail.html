@@ -36,4 +36,20 @@
     </div>
 
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            const productCards = document.querySelectorAll('#productList .card');
+
+            searchInput.addEventListener('input', function(event) {
+                const searchText = event.target.value.trim().toLowerCase();
+
+                productCards.forEach(card => {
+                    const productName = card.querySelector('.card-title').innerText.trim().toLowerCase();
+                    const cardDisplay = productName.includes(searchText) ? 'block' : 'none';
+                    card.parentElement.style.display = cardDisplay;
+                });
+            });
+        });
+    </script>
 {% endblock %}
