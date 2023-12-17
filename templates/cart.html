@@ -1,14 +1,27 @@
-{% for item in cart_items %}
-    <div>
-        <p>{{ item.name }}</p>
-        <p>Price: {{ item.price }}</p>
-        <form method="post" action="{% url 'update_cart' item.id %}">
-            {% csrf_token %}
-            <input type="number" name="quantity" value="{{ item.quantity }}" min="1">
-            <button type="submit">Update</button>
-        </form>
-        <a href="{% url 'remove_from_cart' item.id %}">Remove</a>
-    </div>
-{% endfor %}
-
-<p>Total: {{ total }}</p>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Корзина</title>
+</head>
+<body>
+    <h1>Содержимое корзины</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Название товара</th>
+                <th>Количество</th>
+                <!-- Другие заголовки по вашему усмотрению -->
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in cart_items %}
+            <tr>
+                <td>{{ item.product.name }}</td>
+                <td>{{ item.quantity }}</td>
+                <!-- Другие данные о товаре -->
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

@@ -4,52 +4,125 @@
 
 {% block content %}
     <style>
-        /* Добавьте этот CSS для установки фиксированного размера изображений */
+        /* CSS для установки фиксированного размера изображений */
         .card-img-top {
             width: 400px; /* Ширина изображения */
             height: 300px; /* Высота изображения */
             object-fit: cover; /* Позволяет сохранять пропорции и обрезать изображение при необходимости */
         }
+        /* Дополнительные стили для кнопок и счетчика */
+        .add-to-cart-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .add-to-cart-btn:hover {
+            background-color: #218838;
+        }
+
+        .quantity-control {
+            display: flex;
+            align-items: center;
+        }
+
+        .quantity-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin: 0 5px;
+        }
+
+        .quantity-btn:hover {
+            background-color: #218838;
+        }
+
+        .quantity-display {
+            border: 1px solid #ccc;
+            padding: 5px 10px;
+            border-radius: 5px;
+            margin: 0 5px;
+        }
     </style>
 
-    <div class="container mt-3">
-        <h1>{{ category.name }}</h1>
 
-        <!-- Поле для быстрого поиска по текущей категории -->
-        <div class="input-group mb-3">
-            <input type="text" id="searchInput" class="form-control" placeholder="Поиск по текущей категории">
-        </div>
+<div class="container mt-3">
 
-        <div class="row" id="productList">
-            {% for product in products %}
-                <div class="col-lg-4 col-md-6 col-sm-12 mb-4" data-category="{{ product.category.name }}">
-                    <div class="card h-100">
-                        <img src="{{ product.image.url }}" class="card-img-top img-fluid" alt="{{ product.name }}">
-                        <div class="card-body">
-                            <h5 class="card-title">{{ product.name }}</h5>
-                            <p class="card-text">${{ product.price }}</p>
-                        </div>
-                    </div>
-                </div>
-            {% endfor %}
-        </div>
+    <!-- Поле для быстрого поиска по текущей категории -->
+    <div class="input-group mb-3">
+        <input type="text" id="searchInput" class="form-control" placeholder="Поиск по текущей категории">
     </div>
 
+    <div class="row" id="productList">
+        {% for product in products %}
+            <div class="col-lg-4 col-md-6 col-sm-12 mb-4" data-category="{{ product.category.name }}">
+                <div class="card h-100">
+                    <img src="{{ product.image.url }}" class="card-img-top img-fluid" alt="{{ product.name }}">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ product.name }}</h5>
+                        <p class="card-text">${{ product.price }}</p>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const searchInput = document.getElementById('searchInput');
-            const productCards = document.querySelectorAll('#productList .card');
+                        {% if product.available %}
+                            <form method="post" action="{% url 'add_to_cart' product.id %}">
+                                {% csrf_token %}
+                                <input type="number" name="quantity" value="1" min="1" max="{{ product.quantity_available }}" required>
+                                <button type="submit" class="add-to-cart-btn">Add to Cart</button>
+                            </form>
+                        {% else %}
+                            <p>Out of stock</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
 
-            searchInput.addEventListener('input', function(event) {
-                const searchText = event.target.value.trim().toLowerCase();
+<!-- ваш CSS и HTML код -->
 
-                productCards.forEach(card => {
-                    const productName = card.querySelector('.card-title').innerText.trim().toLowerCase();
-                    const cardDisplay = productName.includes(searchText) ? 'block' : 'none';
-                    card.parentElement.style.display = cardDisplay;
+<!-- ваш HTML и CSS код -->
+
+        <script>
+            // Ваш текущий JavaScript код
+
+            // Найти все кнопки добавления в корзину
+            const addToCartBtns = document.querySelectorAll('.add-to-cart-btn');
+
+            addToCartBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const parentCard = this.closest('.card');
+                    const quantityInput = parentCard.querySelector('.quantity-display input');
+                    const quantity = parseInt(quantityInput.value);
+
+                    // Отправить данные о количестве товара при нажатии кнопки
+                    fetch(`/add_to_cart/${btn.dataset.productId}/`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token }}'  // Django CSRF токен
+                        },
+                        body: JSON.stringify({ quantity: quantity })
+                    })
+                    .then(response => {
+                        // Обработка успешного добавления в корзину, если требуется
+                        // Например, обновление интерфейса или вывод сообщения об успешном добавлении
+                    })
+                    .catch(error => {
+                        // Обработка ошибок при добавлении в корзину, если требуется
+                        // Например, вывод сообщения об ошибке или логирование ошибки
+                    });
                 });
             });
-        });
-    </script>
+        </script>
+
 {% endblock %}
