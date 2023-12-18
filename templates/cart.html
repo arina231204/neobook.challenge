@@ -1,27 +1,90 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Корзина</title>
+    <title>Содержимое корзины</title>
+    <style>
+        /* Стили для карточки товара */
+        body {
+            background-color: #f5f5f5;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+            color: #008000;
+            text-align: center;
+            margin-top: 30px;
+        }
+        .product-card {
+            border: 1px solid #a3a3a3;
+            padding: 10px;
+            margin-bottom: 10px;
+            width: 70%;
+            margin: 0 auto;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: flex-start;
+        }
+        .product-image {
+            width: 200px; /* Ширина изображения */
+            height: 100px; /* Высота изображения */
+            object-fit: cover; /* Позволяет сохранять пропорции и обрезать изображение при необходимости */
+        }
+        .product-details {
+            width: 70%;
+            font-size: 14px;
+        }
+        .product-details h3 {
+            color: #008000;
+            margin-top: 0;
+            font-size: 16px;
+        }
+        .product-details p {
+            margin: 3px 0;
+        }
+        .quantity {
+            font-weight: bold;
+            font-size: 12px;
+            margin-top: auto;
+            margin-left: 5px;
+        }
+        .total-price {
+            margin-top: 20px;
+            font-size: 18px;
+            text-align: center;
+        }
+        .total-price p {
+            margin: 5px 0;
+        }
+        .total-price strong {
+            color: #008000;
+        }
+    </style>
 </head>
 <body>
     <h1>Содержимое корзины</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>Название товара</th>
-                <th>Количество</th>
-                <!-- Другие заголовки по вашему усмотрению -->
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in cart_items %}
-            <tr>
-                <td>{{ item.product.name }}</td>
-                <td>{{ item.quantity }}</td>
-                <!-- Другие данные о товаре -->
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <!-- Используем цикл для каждого товара в корзине -->
+    <div id="productList">
+        {% for item in cart_items %}
+            <div class="product-card">
+                <!-- Изображение товара -->
+                <img class="product-image" src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+                <div class="product-details">
+                    <!-- Детали товара -->
+                    <h3>{{ item.product.name }}</h3>
+                    <p><strong>Цена за шт:</strong> {{ item.product.price }}</p>
+                    <p><strong>Цена общая:</strong> {{ item.total_price }}</p>
+                </div>
+                <p class="quantity"><strong>Кол-во:</strong> {{ item.quantity }}</p>
+            </div>
+        {% endfor %}
+        <!-- Отображение общей цены и доставки -->
+        <div class="total-price">
+            <p><strong>Доставка:</strong> 150.00</p>
+            <p><strong>Итого:</strong> {{ total_price }}</p>
+        </div>
+    </div>
 </body>
 </html>

@@ -21,7 +21,19 @@ def view_cart(request):
     session_key = request.session.session_key
     cart_items = CartItem.objects.filter(session=session_key)
 
-    return render(request, 'cart.html', {'cart_items': cart_items})
+    # Вычисляем общую стоимость для каждого элемента корзины и общую сумму всех товаров
+    total_price = 0
+    for item in cart_items:
+        item.total_price = item.product.price * item.quantity
+        total_price += item.total_price
+
+    # Добавляем стоимость доставки
+    delivery_cost = 150
+    total_price += delivery_cost
+
+    return render(request, 'cart.html', {'cart_items': cart_items, 'total_price': total_price})
+
+
 
 
 def add_to_cart(request, product_id):
