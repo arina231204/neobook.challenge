@@ -1,8 +1,11 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Содержимое корзины</title>
-    <style>
+{% extends 'base.html' %}
+
+{% block title %}
+    <title>Корзина</title>
+{% endblock %}
+
+{% block content %}
+<style>
         /* Стили для карточки товара */
         body {
             background-color: #f5f5f5;
@@ -61,11 +64,27 @@
         .total-price strong {
             color: #008000;
         }
+        .delete-button {
+        position: relative;
+        display: inline-block;
+        background-color: white;
+        border: none;
+        padding: 5px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    /* Стили для иконки мусорки */
+    .delete-icon {
+        width: 20px;
+        height: 20px;
+        background-image: url('link-to-your-trash-icon.png'); /* Замените ссылку на вашу иконку мусорки */
+        background-size: cover;
+    }
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
     </style>
-</head>
-<body>
-    <h1>Содержимое корзины</h1>
-    <!-- Используем цикл для каждого товара в корзине -->
+    <h1>Корзина</h1>
     <div id="productList">
         {% for item in cart_items %}
             <div class="product-card">
@@ -73,18 +92,23 @@
                 <img class="product-image" src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
                 <div class="product-details">
                     <!-- Детали товара -->
-                    <h3>{{ item.product.name }}</h3>
-                    <p><strong>Цена за шт:</strong> {{ item.product.price }}</p>
-                    <p><strong>Цена общая:</strong> {{ item.total_price }}</p>
+                   <h3 style="font-size: 30px; color: green; font-family: 'Comic Sans MS', cursive, sans-serif;"><strong>{{ item.product.name }}</strong></h3>
+                    <p><strong>Цена за шт:</strong> {{ item.product.price }}с</p>
+                    <p style="font-size: 18px; color: green; font-family: 'Comic Sans MS', cursive, sans-serif;"><strong>{{ item.total_price }}с</strong></p>
+
+
                 </div>
-                <p class="quantity"><strong>Кол-во:</strong> {{ item.quantity }}</p>
+                <p style="font-size: 10px; color: green; font-family: 'Comic Sans MS', cursive, sans-serif;"class="quantity"><strong>Кол-во:</strong> {{ item.quantity }}</p>
+                <a href="{% url 'delete_item' item.id %}" style="display: inline-block; padding: 5px 10px; background-color: #ccc; border: 1px solid #000; border-radius: 5px; text-decoration: none; color: #000;">&#10006;</a>
+
+
             </div>
         {% endfor %}
         <!-- Отображение общей цены и доставки -->
         <div class="total-price">
+            <p><strong>Сумма:</strong> {{ all_price }}</p>
             <p><strong>Доставка:</strong> 150.00</p>
             <p><strong>Итого:</strong> {{ total_price }}</p>
         </div>
     </div>
-</body>
-</html>
+{% endblock %}

@@ -26,12 +26,12 @@ def view_cart(request):
     for item in cart_items:
         item.total_price = item.product.price * item.quantity
         total_price += item.total_price
-
+    all_price = total_price
     # Добавляем стоимость доставки
     delivery_cost = 150
     total_price += delivery_cost
 
-    return render(request, 'cart.html', {'cart_items': cart_items, 'total_price': total_price})
+    return render(request, 'cart.html', {'cart_items': cart_items, 'total_price': total_price, 'all_price': all_price})
 
 
 
@@ -49,3 +49,8 @@ def add_to_cart(request, product_id):
             cart_item.save()
 
     return redirect('category_detail', category_id=product.category.id)
+
+def delete_item(request, item_id):
+    item = get_object_or_404(CartItem, id=item_id)
+    item.delete()
+    return redirect('view_cart')
