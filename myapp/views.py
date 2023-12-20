@@ -54,3 +54,15 @@ def delete_item(request, item_id):
     item = get_object_or_404(CartItem, id=item_id)
     item.delete()
     return redirect('view_cart')
+
+
+
+def update_cart(request, item_id):
+    cart_item = get_object_or_404(CartItem, id=item_id)
+
+    if request.method == 'POST':
+        quantity = int(request.POST.get('quantity', 1))
+        cart_item.quantity = quantity
+        cart_item.save()
+
+    return redirect('view_cart')

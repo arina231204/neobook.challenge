@@ -12,17 +12,19 @@
         }
         /* Дополнительные стили для кнопок и счетчика */
         .add-to-cart-btn {
+
             background-color: #28a745;
             color: white;
             border: none;
             padding: 10px 20px;
-            border-radius: 5px;
+            border-radius: 20px;
             cursor: pointer;
             transition: background-color 0.3s;
         }
 
         .add-to-cart-btn:hover {
             background-color: #218838;
+
         }
 
         .quantity-control {
@@ -53,6 +55,43 @@
             border-radius: 5px;
             margin: 0 5px;
         }
+        .cart-button {
+            position: fixed;
+            bottom: 20px;
+            right: 50px; /* Изменено с left на right */
+            z-index: 999; /* Чтобы кнопка была поверх другого контента */
+            text-decoration: none;
+        }
+
+        .cart-icon {
+            width: 100px; /* Ширина иконки корзины */
+            height: 100px; /* Высота иконки корзины */
+            background-color: #3cdb39; /* Цвет иконки */
+            border-radius: 50%; /* Для круглой формы иконки */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px; /* Размер иконки (можно изменить) */
+            color: white; /* Цвет значка корзины */
+            animation: slide 2s infinite; /* Анимация движения */
+
+        }
+
+        .cart-icon::before {
+            content: '\1F6D2'; /* Unicode для иконки корзины (можно изменить) */
+            text-decoration: none;
+        }
+
+
+        /* Анимация движения */
+        @keyframes slide {
+            0%, 100% {
+                transform: translateX(0); /* Начальная и конечная позиция (без смещения) */
+            }
+            50% {
+                transform: translateX(20px); /* Позиция смещения вправо на 20px */
+            }
+        }
     </style>
 
 
@@ -68,17 +107,17 @@
             <div class="col-lg-4 col-md-6 col-sm-12 mb-4" data-category="{{ product.category.name }}">
                 <div class="card h-100">
                     <img src="{{ product.image.url }}" class="card-img-top img-fluid" alt="{{ product.name }}">
-
                     <div class="card-body">
                         <h5 class="card-title">{{ product.name }}</h5>
                         <p class="card-text">${{ product.price }}</p>
 
                         {% if product.available %}
-                            <form method="post" action="{% url 'add_to_cart' product.id %}">
-                                {% csrf_token %}
-                                <input type="number" name="quantity" value="1" min="1" max="{{ product.quantity_available }}" required>
-                                <button type="submit" class="add-to-cart-btn">Add to Cart</button>
-                            </form>
+
+                        <form method="post" action="{% url 'add_to_cart' product.id %}">
+                            {% csrf_token %}
+                            <input type="number" name="quantity" value="1" min="1" max="{{ product.quantity_available }}" required>
+                            <button type="submit" class="add-to-cart-btn">🛒</button>
+                        </form>
                         {% else %}
                             <p>Out of stock</p>
                         {% endif %}
@@ -88,42 +127,30 @@
         {% endfor %}
     </div>
 </div>
-
+<div class="cart-button">
+    <a href="{% url 'view_cart' %}">
+        <div class="cart-icon"></div>
+    </a>
+</div>
 <!-- ваш CSS и HTML код -->
 
 <!-- ваш HTML и CSS код -->
 
-        <script>
-            // Ваш текущий JavaScript код
+<script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            const productCards = document.querySelectorAll('#productList .card');
 
-            // Найти все кнопки добавления в корзину
-            const addToCartBtns = document.querySelectorAll('.add-to-cart-btn');
+            searchInput.addEventListener('input', function(event) {
+                const searchText = event.target.value.trim().toLowerCase();
 
-            addToCartBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const parentCard = this.closest('.card');
-                    const quantityInput = parentCard.querySelector('.quantity-display input');
-                    const quantity = parseInt(quantityInput.value);
-
-                    // Отправить данные о количестве товара при нажатии кнопки
-                    fetch(`/add_to_cart/${btn.dataset.productId}/`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': '{{ csrf_token }}'  // Django CSRF токен
-                        },
-                        body: JSON.stringify({ quantity: quantity })
-                    })
-                    .then(response => {
-                        // Обработка успешного добавления в корзину, если требуется
-                        // Например, обновление интерфейса или вывод сообщения об успешном добавлении
-                    })
-                    .catch(error => {
-                        // Обработка ошибок при добавлении в корзину, если требуется
-                        // Например, вывод сообщения об ошибке или логирование ошибки
-                    });
+                productCards.forEach(card => {
+                    const productName = card.querySelector('.card-title').innerText.trim().toLowerCase();
+                    const cardDisplay = productName.includes(searchText) ? 'block' : 'none';
+                    card.parentElement.style.display = cardDisplay;
                 });
             });
-        </script>
+        });
+    </script>
 
 {% endblock %}
