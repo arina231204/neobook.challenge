@@ -115,9 +115,14 @@
 
                         <form method="post" action="{% url 'add_to_cart' product.id %}">
                             {% csrf_token %}
-                            <input type="number" name="quantity" value="1" min="1" max="{{ product.quantity_available }}" required>
+                            <div class="quantity-control">
+                                <button type="button" class="quantity-btn decrease">-</button>
+                                <input type="number" name="quantity" value="1" min="1" max="{{ product.quantity_available }}" class="quantity-display" required>
+                                <button type="button" class="quantity-btn increase">+</button>
+                            </div>
                             <button type="submit" class="add-to-cart-btn">🛒</button>
                         </form>
+
                         {% else %}
                             <p>Out of stock</p>
                         {% endif %}
@@ -151,6 +156,33 @@
                 });
             });
         });
-    </script>
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const quantityInputs = document.querySelectorAll('.quantity-display');
+        const decreaseButtons = document.querySelectorAll('.quantity-btn.decrease');
+        const increaseButtons = document.querySelectorAll('.quantity-btn.increase');
+
+        decreaseButtons.forEach((button, index) => {
+            button.addEventListener('click', function() {
+                const currentValue = parseInt(quantityInputs[index].value);
+                if (currentValue > 1) {
+                    quantityInputs[index].value = currentValue - 1;
+                }
+            });
+        });
+
+        increaseButtons.forEach((button, index) => {
+            button.addEventListener('click', function() {
+                const currentValue = parseInt(quantityInputs[index].value);
+                const maxValue = parseInt(quantityInputs[index].getAttribute('max'));
+                if (currentValue < maxValue) {
+                    quantityInputs[index].value = currentValue + 1;
+                }
+            });
+        });
+    });
+
+
+</script>
 
 {% endblock %}

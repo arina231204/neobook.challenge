@@ -56,13 +56,21 @@ def delete_item(request, item_id):
     return redirect('view_cart')
 
 
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import CartItem, Product
+
 
 def update_cart(request, item_id):
     cart_item = get_object_or_404(CartItem, id=item_id)
 
     if request.method == 'POST':
         quantity = int(request.POST.get('quantity', 1))
-        cart_item.quantity = quantity
+        # Проверка доступного количества на складе
+        if quantity <= cart_item.product.quantity_available:
+            cart_item.quantity = quantity
+        else:
+            cart_item.quantity = cart_item.product.quantity_available
+
         cart_item.save()
 
     return redirect('view_cart')
