@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block content %}
-<style>
+    <style>
         /* Стили для карточки товара */
         body {
             background-color: #f5f5f5;
@@ -65,24 +65,34 @@
             color: #008000;
         }
         .delete-button {
-        position: relative;
-        display: inline-block;
-        background-color: white;
-        border: none;
-        padding: 5px;
-        border-radius: 5px;
-        cursor: pointer;
-    }
-
-    /* Стили для иконки мусорки */
-    .delete-icon {
-        width: 20px;
-        height: 20px;
-        background-image: url('link-to-your-trash-icon.png'); /* Замените ссылку на вашу иконку мусорки */
-        background-size: cover;
-    }
-    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
-
+            position: relative;
+            display: inline-block;
+            background-color: white;
+            border: none;
+            padding: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        /* Стили для иконки мусорки */
+        .delete-icon {
+            width: 20px;
+            height: 20px;
+            background-image: url('link-to-your-trash-icon.png'); /* Замените ссылку на вашу иконку мусорки */
+            background-size: cover;
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+        .update-form button {
+            display: none;
+        }
+        .update-form {
+            display: flex;
+            align-items: center;
+        }
+        .update-form span,
+        .update-form a,
+        .update-form button {
+            margin-right: 10px;
+        }
     </style>
     <h1>Корзина</h1>
     <div id="productList">
@@ -92,23 +102,19 @@
                 <img class="product-image" src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
                 <div class="product-details">
                     <!-- Детали товара -->
-                   <h3 style="font-size: 30px; color: green; font-family: 'Comic Sans MS', cursive, sans-serif;"><strong>{{ item.product.name }}</strong></h3>
+                    <h3><strong>{{ item.product.name }}</strong></h3>
                     <p><strong>Цена за шт:</strong> {{ item.product.price }}с</p>
-                    <p style="font-size: 18px; color: green; font-family: 'Comic Sans MS', cursive, sans-serif;"><strong>{{ item.total_price }}с</strong></p>
-
-
+                    <p><strong>{{ item.total_price }}с</strong></p>
                 </div>
-                <p style="font-size: 10px; color: green; font-family: 'Comic Sans MS', cursive, sans-serif;"class="quantity"><strong>Кол-во:</strong> {{ item.quantity }}</p>
-                <a href="{% url 'delete_item' item.id %}" style="display: inline-block; padding: 5px 10px; background-color: #ccc; border: 1px solid #000; border-radius: 5px; text-decoration: none; color: #000;">&#10006;</a>
-
+                <div class="update-form">
+                    <input type="hidden" id="quantity_{{ item.id }}" name="quantity" value="{{ item.quantity }}" min="1" max="{{ item.product.quantity_available }}">
+                    <span class="pen-icon" onclick="openModal({{ item.id }})">✏️</span>
+                    <a href="{% url 'delete_item' item.id %}" class="delete-button">❌</a>
+                    <button type="hidden" onclick="openModal({{ item.id }})">&#9999;</button>
+                </div>
+                <p class="quantity"><strong>Кол-во:</strong> {{ item.quantity }}</p>
 
             </div>
-        <form method="post" action="{% url 'update_cart' item.id %}">
-            {% csrf_token %}
-            <label for="quantity">Quantity:</label>
-            <input type="number" id="quantity" name="quantity" value="{{ item.quantity }}" min="1">
-            <input type="submit" value="Update">
-        </form>
         {% endfor %}
         <!-- Отображение общей цены и доставки -->
         <div class="total-price">
@@ -117,4 +123,45 @@
             <p><strong>Итого:</strong> {{ total_price }}</p>
         </div>
     </div>
+
+    <!-- Модальное окно -->
+  <div id="myModal" class="modal">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content" style="border-radius: 10px;">
+            <div class="modal-header" style="background-color: green; border-radius: 10px 10px 0 0;">
+                <span class="close" onclick="closeModal()" style="color: white;">&times;</span>
+            </div>
+            <div class="modal-body text-center" style="padding: 20px;">
+                <form id="updateForm" method="post" action="">
+                    {% csrf_token %}
+                    <label for="modal_quantity">Quantity:</label>
+                    <br>
+                    <input type="number" id="modal_quantity" name="quantity" min="1" max="">
+                    <br><br>
+                    <button type="submit" class="btn btn-success">Save</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+    <script>
+        function openModal(itemId) {
+            var modal = document.getElementById('myModal');
+            var form = document.getElementById('updateForm');
+            var quantityField = document.getElementById('quantity_' + itemId).value;
+            var modalQuantityField = document.getElementById('modal_quantity');
+
+            modal.style.display = 'block';
+            form.action = "{% url 'update_cart' 0 %}".replace('0', itemId);
+            modalQuantityField.value = quantityField;
+            modalQuantityField.setAttribute('max', document.getElementById('quantity_' + itemId).getAttribute('max'));
+        }
+
+        function closeModal() {
+            var modal = document.getElementById('myModal');
+            modal.style.display = 'none';
+        }
+    </script>
 {% endblock %}
