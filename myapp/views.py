@@ -2,6 +2,9 @@ from django.contrib.sessions.models import Session
 from .models import Category, Product, CartItem
 from django.shortcuts import render, redirect,get_object_or_404
 
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import CartItem, Product
+
 from .models import Product
 def category_list(request):
     categories = Category.objects.all()
@@ -56,9 +59,6 @@ def delete_item(request, item_id):
     return redirect('view_cart')
 
 
-from django.shortcuts import render, redirect, get_object_or_404
-from .models import CartItem, Product
-
 
 def update_cart(request, item_id):
     cart_item = get_object_or_404(CartItem, id=item_id)
@@ -74,3 +74,27 @@ def update_cart(request, item_id):
         cart_item.save()
 
     return redirect('view_cart')
+
+
+from django.shortcuts import render, redirect
+from .forms import OrderForm
+from .models import Order
+
+
+def create_order(request):
+    if request.method == 'POST':
+        form = OrderForm(request.POST)
+        if form.is_valid():
+            order = Order(
+                address=form.cleaned_data['address'],
+                total_price=form.cleaned_data['total_price'],
+                quantity=form.cleaned_data['quantity'],
+                name=form.cleaned_data['name'],
+                phone_number=form.cleaned_data['phone_number']
+            )
+            order.save()
+            return redirect('success')  # Перенаправление на страницу "успешного оформления заказа"
+    else:
+        form = OrderForm()
+
+    return render(request, 'order.html', {'form': form})
