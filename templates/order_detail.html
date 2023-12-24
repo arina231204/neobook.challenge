@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    <title>Order Detail</title>
+{% endblock %}
+
+{% block content %}
+<style>
+.cart-button {
+            position: fixed;
+            bottom: 20px;
+            right: 50px; /* Изменено с left на right */
+            z-index: 999; /* Чтобы кнопка была поверх другого контента */
+            text-decoration: none;
+        }
+
+        .cart-icon {
+            width: 100px; /* Ширина иконки корзины */
+            height: 100px; /* Высота иконки корзины */
+            background-color: #A9A9A9; /* Цвет иконки */
+            border-radius: 50%; /* Для круглой формы иконки */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 90px; /* Размер иконки (можно изменить) */
+            color: white; /* Цвет значка корзины */
+            animation: slide 2s infinite; /* Анимация движения */
+
+        }
+
+        .cart-icon::before {
+            content: '🧾';
+            font-size: 55px; /* Установите размер значка */
+            position: absolute; /* Установим позицию для значка */
+            top: 50%; /* Поместим значок по вертикали на 50% */
+            left: 50%; /* Поместим значок по горизонтали на 50% */
+            transform: translate(-50%, -50%); /* Центрируем значок относительно родительского контейнера */
+        }
+        @keyframes slide {
+            0%, 100% {
+                transform: translateX(0); /* Начальная и конечная позиция (без смещения) */
+            }
+            50% {
+                transform: translateX(20px); /* Позиция смещения вправо на 20px */
+            }
+        }
+</style>
+    <!-- Content specific to order detail -->
+    <h1>Order Detail</h1>
+    <p>Order ID: {{ order.id }}</p>
+    <p>Name: {{ order.name }}</p>
+    <p>Phone Number: {{ order.phone_number }}</p>
+    <p>Address: {{ order.address }}</p>
+    <p>Total Price: {{ order.total_price }}</p>
+    <p>Quantity: {{ order.quantity }}</p>
+    <p>Status: {{ order.status }}</p>
+    <!-- Дата создания заказа -->
+    <p>Date: {{ order.created_at|date:"Y-m-d" }}</p>
+
+    <!-- Время создания заказа -->
+    <p>Time: {{ order.created_at|time:"H:i:s" }}</p>
+
+
+    <!-- Placing the cart button within the body -->
+    <div class="cart-button">
+        <a href="{% url 'order_pdf' order.id %}">
+            <div class="cart-icon"></div>
+        </a>
+    </div>
+{% endblock %}

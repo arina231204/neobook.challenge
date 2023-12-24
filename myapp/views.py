@@ -1,9 +1,8 @@
-from django.contrib.sessions.models import Session
-from .models import Category, Product, CartItem
-from django.shortcuts import render, redirect,get_object_or_404
+
+from .models import Category, CartItem, Order
 
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import CartItem, Product
+from .models import CartItem
 
 from .models import Product
 def category_list(request):
@@ -76,25 +75,79 @@ def update_cart(request, item_id):
     return redirect('view_cart')
 
 
-from django.shortcuts import render, redirect
-from .forms import OrderForm
-from .models import Order
+
 
 
 def create_order(request):
-    if request.method == 'POST':
-        form = OrderForm(request.POST)
-        if form.is_valid():
-            order = Order(
-                address=form.cleaned_data['address'],
-                total_price=form.cleaned_data['total_price'],
-                quantity=form.cleaned_data['quantity'],
-                name=form.cleaned_data['name'],
-                phone_number=form.cleaned_data['phone_number']
-            )
-            order.save()
-            return redirect('success')  # Перенаправление на страницу "успешного оформления заказа"
-    else:
-        form = OrderForm()
+    session_key = request.session.session_key
+    cart_items = CartItem.objects.filter(session=session_key)
 
-    return render(request, 'order.html', {'form': form})
+    if request.method == 'POST':
+        cart_items = CartItem.objects.filter(session=session_key)
+
+        if not cart_items.exists():
+            return render(request, 'empty_cart.html')  # Сообщение о пустой корзине
+
+        # Получение данных из формы оформления заказа
+        address = request.POST.get('address')
+        name = request.POST.get('name')
+        phone_number = request.POST.get('phone_number')
+
+        # Вычисление общей суммы заказа и количества товаров
+        total_price = sum(item.product.price * item.quantity for item in cart_items)
+        quantity = sum(item.quantity for item in cart_items)
+
+        # Создание заказа
+        order = Order.objects.create(
+            session_id=session_key,
+            address=address,
+            total_price=total_price,
+            quantity=quantity,
+            name=name,
+            phone_number=phone_number
+        )
+
+        # Очистка корзины после оформления заказа
+        cart_items.delete()
+
+        # Вывод деталей заказа на странице
+        return render(request, 'order_detail.html', {'order': order})
+
+    return render(request, 'order.html', {'cart_items': cart_items})
+
+def view_all_orders(request):
+    orders = Order.objects.all()
+    return render(request, 'all_orders.html', {'orders': orders})
+
+from reportlab.pdfgen import canvas
+
+from .models import Order
+from django.http import HttpResponse
+def generate_order_pdf(request, order_id):
+    order = get_object_or_404(Order, pk=order_id)
+
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="order_{order.id}.pdf"'
+
+    pdf = canvas.Canvas(response)
+
+    # Установка шрифта DejaVuSans, поддерживающего кириллицу
+    pdf.setFont("Times-Roman", 12)
+
+    pdf.drawString(100, 800, f"Order ID: {order.id}")
+    pdf.drawString(100, 780, f"Name: {order.name}")
+    pdf.drawString(100, 760, f"Phone Number: {order.phone_number}")
+    pdf.drawString(100, 740, f"Address: {order.address}")
+    pdf.drawString(100, 720, f"Total Price: {order.total_price}")
+    pdf.drawString(100, 700, f"Quantity: {order.quantity}")
+    pdf.drawString(100, 680, f"Status: {order.status}")
+
+    pdf.showPage()
+    pdf.save()
+    return response
+
+
+
+def view_order_detail(request, order_id):
+    order = get_object_or_404(Order, pk=order_id)
+    return render(request, 'order_detail.html', {'order': order})

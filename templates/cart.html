@@ -93,39 +93,79 @@
         .update-form button {
             margin-right: 10px;
         }
+        .cart-button {
+            position: fixed;
+            bottom: 20px;
+            right: 50px; /* Изменено с left на right */
+            z-index: 999; /* Чтобы кнопка была поверх другого контента */
+            text-decoration: none;
+        }
+
+        .cart-icon {
+            width: 100px; /* Ширина иконки корзины */
+            height: 100px; /* Высота иконки корзины */
+            background-color: #FF8C00; /* Цвет иконки */
+            border-radius: 50%; /* Для круглой формы иконки */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 90px; /* Размер иконки (можно изменить) */
+            color: white; /* Цвет значка корзины */
+            animation: slide 2s infinite; /* Анимация движения */
+
+        }
+
+        .cart-icon::before {
+            content: '📦';
+            font-size: 55px; /* Установите размер значка */
+            position: absolute; /* Установим позицию для значка */
+            top: 50%; /* Поместим значок по вертикали на 50% */
+            left: 50%; /* Поместим значок по горизонтали на 50% */
+            transform: translate(-50%, -50%); /* Центрируем значок относительно родительского контейнера */
+        }
+        @keyframes slide {
+            0%, 100% {
+                transform: translateX(0); /* Начальная и конечная позиция (без смещения) */
+            }
+            50% {
+                transform: translateX(20px); /* Позиция смещения вправо на 20px */
+            }
+        }
     </style>
     <h1>Корзина</h1>
     <div id="productList">
         {% for item in cart_items %}
             <div class="product-card">
-                <!-- Изображение товара -->
                 <img class="product-image" src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
                 <div class="product-details">
-                    <!-- Детали товара -->
                     <h3><strong>{{ item.product.name }}</strong></h3>
                     <p><strong>Цена за шт:</strong> {{ item.product.price }}с</p>
                     <p><strong>{{ item.total_price }}с</strong></p>
                 </div>
-                <div class="update-form">
-                    <input type="hidden" id="quantity_{{ item.id }}" name="quantity" value="{{ item.quantity }}" min="1" max="{{ item.product.quantity_available }}">
-                    <span class="pen-icon" onclick="openModal({{ item.id }})">✏️</span>
-                    <a href="{% url 'delete_item' item.id %}" class="delete-button">❌</a>
-                    <button type="hidden" onclick="openModal({{ item.id }})">&#9999;</button>
-                </div>
+            <div class="update-form">
+                <input type="hidden" id="quantity_{{ item.id }}" name="quantity" value="{{ item.quantity }}" min="1" max="{{ item.product.quantity_available }}">
+                <span class="pen-icon" onclick="openModal({{ item.id }})">✏️</span>
+                <a href="{% url 'delete_item' item.id %}" class="delete-button">❌</a>
+                <button type="hidden" onclick="openModal({{ item.id }})">&#9999;</button>
+            </div>
                 <p class="quantity"><strong>Кол-во:</strong> {{ item.quantity }}</p>
-
             </div>
         {% endfor %}
-        <!-- Отображение общей цены и доставки -->
         <div class="total-price">
             <p><strong>Сумма:</strong> {{ all_price }}</p>
-            <p><strong>Доставка:</strong> 150.00</p>
+            <p><strong>Доставка:</strong>150.00</p>
             <p><strong>Итого:</strong> {{ total_price }}</p>
         </div>
     </div>
+{% if cart_items %}
 
-    <!-- Модальное окно -->
-  <div id="myModal" class="modal">
+<div class="cart-button">
+    <a href="{% url 'create_order' %}">
+        <div class="cart-icon"></div>
+    </a>
+</div>
+{% endif %}
+<div id="myModal" class="modal">
     <div class="modal-dialog modal-dialog-centered modal-sm">
         <div class="modal-content" style="border-radius: 10px;">
             <div class="modal-header" style="background-color: green; border-radius: 10px 10px 0 0;">
@@ -144,21 +184,17 @@
         </div>
     </div>
 </div>
-
-
     <script>
         function openModal(itemId) {
             var modal = document.getElementById('myModal');
             var form = document.getElementById('updateForm');
             var quantityField = document.getElementById('quantity_' + itemId).value;
             var modalQuantityField = document.getElementById('modal_quantity');
-
             modal.style.display = 'block';
             form.action = "{% url 'update_cart' 0 %}".replace('0', itemId);
             modalQuantityField.value = quantityField;
             modalQuantityField.setAttribute('max', document.getElementById('quantity_' + itemId).getAttribute('max'));
         }
-
         function closeModal() {
             var modal = document.getElementById('myModal');
             modal.style.display = 'none';

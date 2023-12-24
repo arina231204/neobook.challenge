@@ -74,6 +74,7 @@
             font-size: 24px; /* Размер иконки (можно изменить) */
             color: white; /* Цвет значка корзины */
             animation: slide 2s infinite; /* Анимация движения */
+            text-decoration: none;
 
         }
 
@@ -132,14 +133,13 @@
         {% endfor %}
     </div>
 </div>
+
 <div class="cart-button">
     <a href="{% url 'view_cart' %}">
         <div class="cart-icon"></div>
     </a>
 </div>
-<!-- ваш CSS и HTML код -->
 
-<!-- ваш HTML и CSS код -->
 
 <script>
         document.addEventListener('DOMContentLoaded', function() {

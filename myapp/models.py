@@ -30,13 +30,20 @@ class CartItem(models.Model):
         return f"{self.quantity} x {self.product.name} ({self.session})"
 
 class Order(models.Model):
+    STATUS_CHOICES = [
+        ('PENDING','PENDING'),
+        ('APPROVED', 'APPROVED'),
+        ('COMPLETED','COMPLETED'),
+    ]
     session = models.ForeignKey(Session, on_delete=models.CASCADE)
     address = models.CharField(max_length=255)
-    total_price = models.DecimalField(max_digits=10, decimal_places=2)
+    total_price = models.DecimalField(max_digits=10, decimal_places=2)  # Добавьте это поле
     quantity = models.PositiveIntegerField(default=1)
     name = models.CharField(max_length=100)
     phone_number = models.CharField(max_length=20)
     created_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
+    cart_items = models.ManyToManyField('CartItem', blank=True)
 
     def __str__(self):
         return f"Order #{self.pk}"
