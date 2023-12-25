@@ -1,10 +1,15 @@
+import os
 
-from .models import Category, CartItem, Order
+from django.shortcuts import render, redirect
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
+from reportlab.pdfgen import canvas
+from io import BytesIO
 
-from django.shortcuts import render, redirect, get_object_or_404
-from .models import CartItem
+from myproject import settings
+from .models import Product,Category,CartItem, OrderItem,Order, Category
 
-from .models import Product
+
 def category_list(request):
     categories = Category.objects.all()
     return render(request, 'category_list.html', {'categories': categories})
@@ -74,10 +79,6 @@ def update_cart(request, item_id):
 
     return redirect('view_cart')
 
-
-
-
-
 def create_order(request):
     session_key = request.session.session_key
     cart_items = CartItem.objects.filter(session=session_key)
@@ -107,11 +108,19 @@ def create_order(request):
             phone_number=phone_number
         )
 
+        # Добавление содержимого корзины в OrderItem перед очисткой корзины
+        for cart_item in cart_items:
+            OrderItem.objects.create(
+                order=order,
+                product=cart_item.product,
+                quantity=cart_item.quantity
+            )
+
         # Очистка корзины после оформления заказа
         cart_items.delete()
 
         # Вывод деталей заказа на странице
-        return render(request, 'order_detail.html', {'order': order})
+        return redirect('order_detail', order_id=order.pk)
 
     return render(request, 'order.html', {'cart_items': cart_items})
 
@@ -119,20 +128,74 @@ def view_all_orders(request):
     orders = Order.objects.all()
     return render(request, 'all_orders.html', {'orders': orders})
 
+# def generate_order_pdf(request, order_id):
+#     order = get_object_or_404(Order, pk=order_id)
+#
+#     response = HttpResponse(content_type='application/pdf')
+#     response['Content-Disposition'] = f'attachment; filename="order_{order.id}.pdf"'
+#
+#     pdf = canvas.Canvas(response)
+#
+#     # Установка шрифта DejaVuSans, поддерживающего кириллицу
+#     pdf.setFont("Times-Roman", 12)
+#
+#     pdf.drawString(100, 800, f"Order ID: {order.id}")
+#     pdf.drawString(100, 780, f"Name: {order.name}")
+#     pdf.drawString(100, 760, f"Phone Number: {order.phone_number}")
+#     pdf.drawString(100, 740, f"Address: {order.address}")
+#     pdf.drawString(100, 720, f"Total Price: {order.total_price}")
+#     pdf.drawString(100, 700, f"Quantity: {order.quantity}")
+#     pdf.drawString(100, 680, f"Status: {order.status}")
+#
+#     formatted_date = order.created_at.strftime('%Y-%m-%d')
+#     formatted_time = order.created_at.strftime('%H:%M:%S')
+#     pdf.drawString(100, 660, f"Date: {formatted_date}")
+#     pdf.drawString(100, 640, f"Time: {formatted_time}")
+#
+#     pdf.showPage()
+#     pdf.save()
+#     return response вот для справки def order_detail(request, order_id):
+#     order = Order.objects.get(pk=order_id)
+#     order_items = OrderItem.objects.filter(order=order)
+#     items_with_total = []
+#     for order_item in order_items:
+#         total = order_item.quantity * order_item.product.price
+#         items_with_total.append({
+#             'order_item': order_item,
+#             'total': total,
+#
+#         })
+#
+#     context = {
+#         'order': order,
+#         'items_with_total': items_with_total,
+#     }
+#
+#     return render(request, 'order_detail.html', context)
+
+
+from io import BytesIO
+from reportlab.pdfgen import canvas
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.pdfbase import pdfmetrics
+
+from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 
-from .models import Order
-from django.http import HttpResponse
 def generate_order_pdf(request, order_id):
     order = get_object_or_404(Order, pk=order_id)
+    order_items = OrderItem.objects.filter(order=order)
 
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename="order_{order.id}.pdf"'
 
-    pdf = canvas.Canvas(response)
+    buffer = BytesIO()
+    pdf = canvas.Canvas(buffer)
 
     # Установка шрифта DejaVuSans, поддерживающего кириллицу
-    pdf.setFont("Times-Roman", 12)
+    font_path = os.path.join('DejaVuSans-Bold.ttf')
+    pdfmetrics.registerFont(TTFont('DejaVuSans', font_path))
+    pdf.setFont("DejaVuSans", 12)
 
     pdf.drawString(100, 800, f"Order ID: {order.id}")
     pdf.drawString(100, 780, f"Name: {order.name}")
@@ -142,12 +205,53 @@ def generate_order_pdf(request, order_id):
     pdf.drawString(100, 700, f"Quantity: {order.quantity}")
     pdf.drawString(100, 680, f"Status: {order.status}")
 
+    formatted_date = order.created_at.strftime('%Y-%m-%d')
+    formatted_time = order.created_at.strftime('%H:%M:%S')
+    pdf.drawString(100, 660, f"Date: {formatted_date}")
+    pdf.drawString(100, 640, f"Time: {formatted_time}")
+
+    y_coordinate = 600  # Начальная координата для отрисовки информации о товарах
+
+    for order_item in order_items:
+        total = order_item.quantity * order_item.product.price
+
+        product_name = order_item.product.name
+        quantity = order_item.quantity
+        price = order_item.product.price
+
+        text = f"{quantity} x {product_name} - {price:.2f} - {total:.2f}"
+        pdf.drawString(100, y_coordinate, text)
+        y_coordinate -= 20
+    image_path = 'media/images/k.png'  # Путь к вашему изображению
+    pdf.drawImage(image_path, 100, 500, width=200, height=100)
     pdf.showPage()
     pdf.save()
+
+    pdf_data = buffer.getvalue()
+    buffer.close()
+    response.write(pdf_data)
+
     return response
 
 
 
-def view_order_detail(request, order_id):
-    order = get_object_or_404(Order, pk=order_id)
-    return render(request, 'order_detail.html', {'order': order})
+
+
+def order_detail(request, order_id):
+    order = Order.objects.get(pk=order_id)
+    order_items = OrderItem.objects.filter(order=order)
+    items_with_total = []
+    for order_item in order_items:
+        total = order_item.quantity * order_item.product.price
+        items_with_total.append({
+            'order_item': order_item,
+            'total': total,
+
+        })
+
+    context = {
+        'order': order,
+        'items_with_total': items_with_total,
+    }
+
+    return render(request, 'order_detail.html', context)
