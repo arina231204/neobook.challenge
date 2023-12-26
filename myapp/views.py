@@ -1,13 +1,14 @@
 import os
-
-from django.shortcuts import render, redirect
-from django.http import HttpResponse
-from django.shortcuts import get_object_or_404
-from reportlab.pdfgen import canvas
 from io import BytesIO
 
-from myproject import settings
-from .models import Product,Category,CartItem, OrderItem,Order, Category
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
+from django.shortcuts import render, redirect
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.pdfgen import canvas
+
+from .models import Product, CartItem, OrderItem, Order, Category
 
 
 def category_list(request):
@@ -79,6 +80,8 @@ def update_cart(request, item_id):
 
     return redirect('view_cart')
 
+from django.db.models import F
+
 def create_order(request):
     session_key = request.session.session_key
     cart_items = CartItem.objects.filter(session=session_key)
@@ -108,11 +111,21 @@ def create_order(request):
             phone_number=phone_number
         )
 
-        # Добавление содержимого корзины в OrderItem перед очисткой корзины
+        # Уменьшение количества продуктов на складе после оформления заказа
         for cart_item in cart_items:
+            product = cart_item.product
+            quantity_to_reduce = cart_item.quantity
+            product.quantity_available -= quantity_to_reduce  # Предполагается, что у продукта есть поле quantity
+            product.save()
+
+            # Или если у вас есть возможность использовать F-объекты для обновления в базе данных без извлечения объекта
+            # Примерно так:
+            # Product.objects.filter(id=product.id).update(quantity=F('quantity') - quantity_to_reduce)
+
+            # Создание записи OrderItem для каждого элемента корзины
             OrderItem.objects.create(
                 order=order,
-                product=cart_item.product,
+                product=product,
                 quantity=cart_item.quantity
             )
 
@@ -124,63 +137,15 @@ def create_order(request):
 
     return render(request, 'order.html', {'cart_items': cart_items})
 
+
 def view_all_orders(request):
     orders = Order.objects.all()
     return render(request, 'all_orders.html', {'orders': orders})
 
-# def generate_order_pdf(request, order_id):
-#     order = get_object_or_404(Order, pk=order_id)
-#
-#     response = HttpResponse(content_type='application/pdf')
-#     response['Content-Disposition'] = f'attachment; filename="order_{order.id}.pdf"'
-#
-#     pdf = canvas.Canvas(response)
-#
-#     # Установка шрифта DejaVuSans, поддерживающего кириллицу
-#     pdf.setFont("Times-Roman", 12)
-#
-#     pdf.drawString(100, 800, f"Order ID: {order.id}")
-#     pdf.drawString(100, 780, f"Name: {order.name}")
-#     pdf.drawString(100, 760, f"Phone Number: {order.phone_number}")
-#     pdf.drawString(100, 740, f"Address: {order.address}")
-#     pdf.drawString(100, 720, f"Total Price: {order.total_price}")
-#     pdf.drawString(100, 700, f"Quantity: {order.quantity}")
-#     pdf.drawString(100, 680, f"Status: {order.status}")
-#
-#     formatted_date = order.created_at.strftime('%Y-%m-%d')
-#     formatted_time = order.created_at.strftime('%H:%M:%S')
-#     pdf.drawString(100, 660, f"Date: {formatted_date}")
-#     pdf.drawString(100, 640, f"Time: {formatted_time}")
-#
-#     pdf.showPage()
-#     pdf.save()
-#     return response вот для справки def order_detail(request, order_id):
-#     order = Order.objects.get(pk=order_id)
-#     order_items = OrderItem.objects.filter(order=order)
-#     items_with_total = []
-#     for order_item in order_items:
-#         total = order_item.quantity * order_item.product.price
-#         items_with_total.append({
-#             'order_item': order_item,
-#             'total': total,
-#
-#         })
-#
-#     context = {
-#         'order': order,
-#         'items_with_total': items_with_total,
-#     }
-#
-#     return render(request, 'order_detail.html', context)
 
 
-from io import BytesIO
-from reportlab.pdfgen import canvas
-from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.pdfbase import pdfmetrics
 
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
+
 
 def generate_order_pdf(request, order_id):
     order = get_object_or_404(Order, pk=order_id)
@@ -223,7 +188,7 @@ def generate_order_pdf(request, order_id):
         pdf.drawString(100, y_coordinate, text)
         y_coordinate -= 20
     image_path = 'media/images/k.png'  # Путь к вашему изображению
-    pdf.drawImage(image_path, 100, 500, width=200, height=100)
+    pdf.drawImage(image_path, 350,600, width=220, height=210)
     pdf.showPage()
     pdf.save()
 

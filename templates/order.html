@@ -1,23 +1,22 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Оформление заказа</title>
-</head>
-<body>
-    <h1>Оформление заказа</h1>
-    <form method="POST" action="{% url 'create_order' %}">
-        {% csrf_token %}
-        <label for="address">Адрес доставки:</label><br>
-        <input type="text" id="address" name="address" required><br><br>
+{% extends 'base.html' %}
+{% block content %}
+    <div class="container">
+        <h1>Оформление заказа</h1>
+        <form method="POST" action="{% url 'create_order' %}">
+            {% csrf_token %}
+            <div class="mb-3">
+                <input type="text" class="form-control" id="address" name="address" placeholder="Адрес доставки" required>
+            </div>
 
-        <label for="name">Имя:</label><br>
-        <input type="text" id="name" name="name" required><br><br>
+            <div class="mb-3">
+                <input type="text" class="form-control" id="name" name="name" placeholder="Имя" required>
+            </div>
 
-        <label for="phone_number">Номер телефона:</label><br>
-        <input type="text" id="phone_number" name="phone_number" required><br><br>
+            <div class="mb-3">
+                <input type="text" class="form-control" id="phone_number" name="phone_number" placeholder="Номер телефона" required>
+            </div>
 
-        <button type="submit">Оформить заказ</button>
-    </form>
-</body>
-</html>
+            <button type="submit" class="btn btn-success">Оформить заказ</button>
+        </form>
+    </div>
+{% endblock %}

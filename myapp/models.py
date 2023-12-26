@@ -9,6 +9,7 @@ class Category(models.Model):
         return self.name
 
 class Product(models.Model):
+
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     description = models.TextField()
@@ -16,6 +17,7 @@ class Product(models.Model):
     available = models.BooleanField(default=True)
     quantity_available = models.IntegerField()
     image = models.ImageField(upload_to='images/')
+
 
 
     def __str__(self):
@@ -31,10 +33,10 @@ class CartItem(models.Model):
 
 class Order(models.Model):
     STATUS_CHOICES = [
-        ('PENDING','PENDING'),
-        ('APPROVED', 'APPROVED'),
-        ('COMPLETED','COMPLETED'),
-        ('CANCEL','CANCEL'),
+        ('Нa расмотрении','PENDING'),
+        ('Делается', 'APPROVED'),
+        ('Доставлено','COMPLETED'),
+        ('Отменено','CANCEL'),
     ]
     session = models.ForeignKey(Session, on_delete=models.CASCADE)
     address = models.CharField(max_length=255)
@@ -43,7 +45,7 @@ class Order(models.Model):
     name = models.CharField(max_length=100)
     phone_number = models.CharField(max_length=20)
     created_at = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Нa расмотрении')
     cart_items = models.ManyToManyField('CartItem', blank=True)
 
     def __str__(self):

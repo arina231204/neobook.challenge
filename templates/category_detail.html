@@ -110,9 +110,9 @@
                     <img src="{{ product.image.url }}" class="card-img-top img-fluid" alt="{{ product.name }}">
                     <div class="card-body">
                         <h5 class="card-title">{{ product.name }}</h5>
-                        <p class="card-text">{{ product.price }} с</p>
+                        <p class="card-text">{{ product.price }} сом  за {{ product.description }}</p>
 
-                        {% if product.available %}
+                        {% if product.quantity_available != 0 %}
 
                         <form method="post" action="{% url 'add_to_cart' product.id %}">
                             {% csrf_token %}
@@ -125,7 +125,7 @@
                         </form>
 
                         {% else %}
-                            <p>Out of stock</p>
+                            <p>Пока нет в наличии</p>
                         {% endif %}
                     </div>
                 </div>
