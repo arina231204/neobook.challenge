@@ -36,7 +36,7 @@ class Order(models.Model):
         ('Нa расмотрении','PENDING'),
         ('Делается', 'APPROVED'),
         ('Доставлено','COMPLETED'),
-        ('Отменено','CANCEL'),
+        ('Отменен','CANCEL'),
     ]
     session = models.ForeignKey(Session, on_delete=models.CASCADE)
     address = models.CharField(max_length=255)
